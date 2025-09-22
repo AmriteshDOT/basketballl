@@ -4,7 +4,7 @@ import xgboost as xgb
 from sklearn.metrics import mean_absolute_error, brier_score_loss
 from scipy.interpolate import UnivariateSpline
 
-def run_models(tourney_data, ss_T1, ss_T2, seeds_T1, seeds_T2, elos_T1, elos_T2):
+def modelling(tourney_data, ss_T1, ss_T2, seeds_T1, seeds_T2, elos_T1, elos_T2):
     tourney_data = pd.merge(tourney_data, elos_T1, on=["Season", "T1_TeamID"], how="left")
     tourney_data = pd.merge(tourney_data, elos_T2, on=["Season", "T2_TeamID"], how="left")
     tourney_data["elo_diff"] = tourney_data["T1_elo"] - tourney_data["T2_elo"]

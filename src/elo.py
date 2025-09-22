@@ -1,17 +1,20 @@
 import pandas as pd
 import numpy as np
 
-def update_elo(winner_elo, loser_elo):
+
+def update_elo(winner_elo, loser_elo, k_factor=400):
     expected_win = expected_result(winner_elo, loser_elo)
     change_in_elo = k_factor * (1 - expected_win)
     winner_elo += change_in_elo
     loser_elo -= change_in_elo
     return winner_elo, loser_elo
 
-def expected_result(elo_a, elo_b):
+
+def expected_result(elo_a, elo_b, elo_width=400):
     return 1.0 / (1 + 10 ** ((elo_b - elo_a) / elo_width))
 
-def compute_elos(regular_data, seeds):
+
+def get_elo(regular_data, seeds):
     base_elo = 1000
     elo_width = 400
     k_factor = 100

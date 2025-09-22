@@ -1,6 +1,6 @@
 import pandas as pd
 
-def add_seed_and_averages(tourney_data, seeds, regular_data):
+def seed_avg(tourney_data, seeds, regular_data):
     seeds["seed"] = seeds["Seed"].apply(lambda x: int(x[1:3]))
 
     seeds_T1 = seeds[["Season", "TeamID", "seed"]].copy()
