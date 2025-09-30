@@ -1,17 +1,18 @@
 import pandas as pd
 
-def seed_avg(tourney_data, seeds, regular_data):
-    seeds["seed"] = seeds["Seed"].apply(lambda x: int(x[1:3]))
 
-    seeds_T1 = seeds[["Season", "TeamID", "seed"]].copy()
-    seeds_T2 = seeds[["Season", "TeamID", "seed"]].copy()
-    seeds_T1.columns = ["Season", "T1_TeamID", "T1_seed"]
-    seeds_T2.columns = ["Season", "T2_TeamID", "T2_seed"]
+def add_seed_and_avgs(tour, s, reg):
+    s["seed"] = s["Seed"].apply(lambda x: int(x[1:3]))
 
-    tourney_data = tourney_data[["Season", "T1_TeamID", "T2_TeamID", "PointDiff", "win", "men_women"]]
-    tourney_data = pd.merge(tourney_data, seeds_T1, on=["Season", "T1_TeamID"], how="left")
-    tourney_data = pd.merge(tourney_data, seeds_T2, on=["Season", "T2_TeamID"], how="left")
-    tourney_data["Seed_diff"] = tourney_data["T2_seed"] - tourney_data["T1_seed"]
+    s_t1 = s[["Season", "TeamID", "seed"]].copy()
+    s_t2 = s[["Season", "TeamID", "seed"]].copy()
+    s_t1.columns = ["Season", "T1_TeamID", "T1_seed"]
+    s_t2.columns = ["Season", "T2_TeamID", "T2_seed"]
+
+    tour = tour[["Season", "T1_TeamID", "T2_TeamID", "PointDiff", "win", "men_women"]]
+    tour = pd.merge(tour, s_t1, on=["Season", "T1_TeamID"], how="left")
+    tour = pd.merge(tour, s_t2, on=["Season", "T2_TeamID"], how="left")
+    tour["Seed_diff"] = tour["T2_seed"] - tour["T1_seed"]
 
     boxcols = [
         "T1_Score",
@@ -45,22 +46,31 @@ def seed_avg(tourney_data, seeds, regular_data):
         "PointDiff",
     ]
 
-    ss = regular_data.groupby(["Season", "T1_TeamID"])[boxcols].agg("mean").reset_index()
+    ss = reg.groupby(["Season", "T1_TeamID"])[boxcols].agg("mean").reset_index()
 
-    ss_T1 = ss.copy()
-    ss_T1.columns = [
+    ss_t1 = ss.copy()
+    ss_t1.columns = [
         "T1_avg_" + x.replace("T1_", "").replace("T2_", "opponent_")
-        for x in list(ss_T1.columns)
+        for x in list(ss_t1.columns)
     ]
-    ss_T1 = ss_T1.rename({"T1_avg_Season": "Season", "T1_avg_TeamID": "T1_TeamID"}, axis=1)
-    ss_T2 = ss.copy()
-    ss_T2.columns = [
+    ss_t1 = ss_t1.rename(
+        {"T1_avg_Season": "Season", "T1_avg_TeamID": "T1_TeamID"}, axis=1
+    )
+
+    ss_t2 = ss.copy()
+    ss_t2.columns = [
         "T2_avg_" + x.replace("T1_", "").replace("T2_", "opponent_")
-        for x in list(ss_T2.columns)
+        for x in list(ss_t2.columns)
     ]
-    ss_T2 = ss_T2.rename({"T2_avg_Season": "Season", "T2_avg_TeamID": "T2_TeamID"}, axis=1)
+    ss_t2 = ss_t2.rename(
+        {"T2_avg_Season": "Season", "T2_avg_TeamID": "T2_TeamID"}, axis=1
+    )
 
-    tourney_data = pd.merge(tourney_data, ss_T1, on=["Season", "T1_TeamID"], how="left")
-    tourney_data = pd.merge(tourney_data, ss_T2, on=["Season", "T2_TeamID"], how="left")
+    tour = pd.merge(tour, ss_t1, on=["Season", "T1_TeamID"], how="left")
+    tour = pd.merge(tour, ss_t2, on=["Season", "T2_TeamID"], how="left")
 
-    return tourney_data, ss_T1, ss_T2
+    return tour, ss_t1, ss_t2
+
+
+if __name__ == "__main__":
+    pass

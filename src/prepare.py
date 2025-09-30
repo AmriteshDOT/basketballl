@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 def prepare_data(df):
     df = df[
         [
@@ -40,8 +41,8 @@ def prepare_data(df):
         ]
     ]
 
-    adjot = (40 + 5 * df["NumOT"]) / 40
-    adjcols = [
+    adj = (40 + 5 * df["NumOT"]) / 40
+    cols = [
         "LScore",
         "WScore",
         "LFGM",
@@ -71,23 +72,23 @@ def prepare_data(df):
         "WBlk",
         "WPF",
     ]
-    for col in adjcols:
-        df[col] = df[col] / adjot
 
-    dfswap = df.copy()
+    for c in cols:
+        df[c] = df[c] / adj
+
+    df_swap = df.copy()
     df.columns = [x.replace("W", "T1_").replace("L", "T2_") for x in list(df.columns)]
-    dfswap.columns = [
-        x.replace("L", "T1_").replace("W", "T2_") for x in list(dfswap.columns)
+    df_swap.columns = [
+        x.replace("L", "T1_").replace("W", "T2_") for x in list(df_swap.columns)
     ]
-    output = pd.concat([df, dfswap]).reset_index(drop=True)
-    output["PointDiff"] = output["T1_Score"] - output["T2_Score"]
-    output["win"] = (output["PointDiff"] > 0) * 1
-    output["men_women"] = (
-        output["T1_TeamID"].apply(lambda t: str(t).startswith("1"))
-    ) * 1
-    return output
+    out = pd.concat([df, df_swap]).reset_index(drop=True)
+    out["PointDiff"] = out["T1_Score"] - out["T2_Score"]
+    out["win"] = (out["PointDiff"] > 0) * 1
+    out["men_women"] = (out["T1_TeamID"].apply(lambda t: str(t).startswith("1"))) * 1
+    return out
 
-def build(regular_results, tourney_results):
-    regular_data = prepare_data(regular_results)
-    tourney_data = prepare_data(tourney_results)
-    return regular_data, tourney_data
+
+def build(reg, tour):
+    reg_data = prepare_data(reg)
+    tour_data = prepare_data(tour)
+    return reg_data, tour_data
